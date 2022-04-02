@@ -23,7 +23,14 @@ type SkipList struct {
 
 func NewSkipList() *SkipList {
 	//implement me here!!!
-	return nil
+	header := &Element{
+		levels: make([]*Element, defaultMaxLevel),
+	}
+	return &SkipList{
+		header:   header,
+		maxLevel: defaultMaxLevel - 1,
+		rand:     r,
+	}
 }
 
 type Element struct {
