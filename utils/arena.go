@@ -8,7 +8,7 @@ import (
 )
 
 type Arena struct {
-	n   uint32 //offset
+	n   uint32 // offset
 	buf []byte
 }
 
@@ -26,11 +26,11 @@ func newArena(n int64) *Arena {
 }
 
 func (s *Arena) allocate(sz uint32) uint32 {
-	//implement me here！！！
+	// implement me here！！！
 	// 在 arena 中分配指定大小的内存空间
 	offset := atomic.AddUint32(&s.n, sz)
 	buflen := len(s.buf)
-	//如果剩下的空间 不足以分配给下一个
+	// 如果剩下的空间 不足以分配给下一个
 	if buflen-int(offset) < MaxNodeSize {
 		groupby := uint32(len(s.buf))
 		if groupby < 1<<30 {
@@ -49,10 +49,10 @@ func (s *Arena) allocate(sz uint32) uint32 {
 	return offset - sz
 }
 
-//在arena里开辟一块空间，用以存放sl中的节点
+// 在arena里开辟一块空间，用以存放sl中的节点
 //返回值为在arena中的offset
 func (s *Arena) putNode(height int) uint32 {
-	//implement me here！！！
+	// implement me here！！！
 	// 这里的 node 要保存 value 、key 和 next 指针值
 	// 所以要计算清楚需要申请多大的内存空间
 
@@ -62,13 +62,13 @@ func (s *Arena) putNode(height int) uint32 {
 	l := uint32(MaxNodeSize - unusedsize + nodeAlign)
 
 	n := s.allocate(uint32(l))
-	//内存对齐
+	// 内存对齐
 	m := (n + uint32(nodeAlign)) & ^uint32(nodeAlign)
 	return m
 }
 
 func (s *Arena) putVal(v ValueStruct) uint32 {
-	//implement me here！！！
+	// implement me here！！！
 	//将 Value 值存储到 arena 当中
 	// 并且将指针返回，返回的指针值应被存储在 Node 节点中
 
@@ -79,7 +79,7 @@ func (s *Arena) putVal(v ValueStruct) uint32 {
 }
 
 func (s *Arena) putKey(key []byte) uint32 {
-	//implement me here！！！
+	// implement me here！！！
 	//将  Key 值存储到 arena 当中
 	// 并且将指针返回，返回的指针值应被存储在 Node 节点中
 
@@ -109,9 +109,9 @@ func (s *Arena) getVal(offset uint32, size uint32) (v ValueStruct) {
 	return
 }
 
-//用element在内存中的地址 - arena首字节的内存地址，得到在arena中的偏移量
+// 用element在内存中的地址 - arena首字节的内存地址，得到在arena中的偏移量
 func (s *Arena) getElementOffset(nd *Element) uint32 {
-	//implement me here！！！
+	// implement me here！！！
 	//获取某个节点，在 arena 当中的偏移量
 	if nd == nil {
 		return 0
@@ -122,7 +122,7 @@ func (s *Arena) getElementOffset(nd *Element) uint32 {
 }
 
 func (e *Element) getNextOffset(h int) uint32 {
-	//implement me here！！！
+	// implement me here！！！
 	// 这个方法用来计算节点在h 层数下的 next 节点
 	return atomic.LoadUint32(&e.levels[h])
 }
