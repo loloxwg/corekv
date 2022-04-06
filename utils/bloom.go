@@ -79,6 +79,7 @@ func appendFilter(keys []uint32, bitsPerKey int) []byte {
 	if bitsPerKey < 0 {
 		bitsPerKey = 0
 	}
+	// 0.69 is approximately ln(2).
 	k := uint32(float64(bitsPerKey) * 0.69)
 	if k < 1 {
 		k = 1
@@ -88,7 +89,8 @@ func appendFilter(keys []uint32, bitsPerKey int) []byte {
 	}
 
 	nBits := len(keys) * int(bitsPerKey)
-
+	// For small len(keys), we can see a very high false positive rate. Fix it
+	// by enforcing a minimum bloom filter length.
 	if nBits < 64 {
 		nBits = 64
 	}
@@ -105,6 +107,7 @@ func appendFilter(keys []uint32, bitsPerKey int) []byte {
 		}
 	}
 
+	//record the K value of this Bloom Filter
 	filter[nBytes] = uint8(k)
 
 	return filter
@@ -114,10 +117,27 @@ func appendFilter(keys []uint32, bitsPerKey int) []byte {
 func Hash(b []byte) uint32 {
 	//Implement me here!!!
 	//在这里实现高效的HashFunction
-	h := uint32(0)
-	for i := 0; i < len(b); i++ {
-		h += uint32(b[i])
+	const (
+		seed = 0xbc9f1d34 // 种子对于测试的影响
+		m    = 0xc6a4a793
+	)
+	h := uint32(seed) ^ uint32(len(b))*m
+	for ; len(b) >= 4; b = b[4:] {
+		h += uint32(b[0]) | uint32(b[1])<<8 | uint32(b[2])<<16 | uint32(b[3])<<24
+		h *= m
+		h ^= h >> 16
 	}
-
+	switch len(b) {
+	case 3:
+		h += uint32(b[2]) << 16
+		fallthrough
+	case 2:
+		h += uint32(b[1]) << 8
+		fallthrough
+	case 1:
+		h += uint32(b[0])
+		h *= m
+		h ^= h >> 24
+	}
 	return h
 }
