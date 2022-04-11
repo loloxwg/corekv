@@ -35,7 +35,8 @@ func (lru *windowLRU) add(newitem storeItem) (eitem storeItem, evicted bool) {
 
 	delete(lru.data, item.key)
 
-	eitem, *item = *item, newitem
+	eitem, *item = *item, newitem //copy item to eitem and then copy newitem to item
+	//直接取代原来的item，不用拷贝，直接替换
 
 	lru.data[item.key] = evictItem
 	lru.list.MoveToFront(evictItem)
