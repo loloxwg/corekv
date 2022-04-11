@@ -26,19 +26,19 @@ func newWindowLRU(size int, data map[uint64]*list.Element) *windowLRU {
 func (lru *windowLRU) add(newitem storeItem) (eitem storeItem, evicted bool) {
 	//implement me here!!!
 	if lru.list.Len() < lru.cap {
-		eitem = newitem
-		lru.data[eitem.key] = lru.list.PushFront(eitem)
-		return
+		lru.data[newitem.key] = lru.list.PushFront(&newitem)
+		return storeItem{}, false
 	}
-	//要淘汰的item 在list中的位置是链表尾部
+
 	evictItem := lru.list.Back()
 	item := evictItem.Value.(*storeItem)
 
 	delete(lru.data, item.key)
-	//lru.list.Remove(evictedItem)
+
 	eitem, *item = *item, newitem
-	//这里实现的和普通的lru不同
-	lru.data[item.key] = lru.list.PushFront(evictItem)
+
+	lru.data[item.key] = evictItem
+	lru.list.MoveToFront(evictItem)
 	return eitem, true
 }
 
